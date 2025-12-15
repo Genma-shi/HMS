@@ -1,54 +1,33 @@
+# appointments/models.py
 from django.db import models
-from datetime import timedelta
+from django.conf import settings
 from django.utils import timezone
-from doctors.models import DoctorProfile
-from patients.models import PatientProfile
-
-
-class AppointmentStatus(models.TextChoices):
-    SCHEDULED = 'SCHEDULED', 'Запланирован'
-    CANCELLED = 'CANCELLED', 'Отменён'
-    COMPLETED = 'COMPLETED', 'Завершён'
-    NO_SHOW = 'NO_SHOW', 'Не пришёл'
-
 
 class Appointment(models.Model):
-    patient = models.ForeignKey(
-        PatientProfile,
-        on_delete=models.CASCADE,
-        related_name='appointments'
-    )
     doctor = models.ForeignKey(
-        DoctorProfile,
+        'doctors.DoctorProfile',
         on_delete=models.CASCADE,
         related_name='appointments'
     )
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    status = models.CharField(
-        max_length=15,
-        choices=AppointmentStatus.choices,
-        default=AppointmentStatus.SCHEDULED
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        if not self.end_time:
-            self.end_time = self.start_time + timedelta(hours=1)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f'{self.patient.user.get_full_name()} → {self.doctor.user.get_full_name()}'
-
-
-class VisitHistory(models.Model):
-    appointment = models.OneToOneField(
-        Appointment,
+    patient = models.ForeignKey(
+        'patients.PatientProfile',
         on_delete=models.CASCADE,
-        related_name='visit_history'
+        related_name='appointments'
     )
-    notes = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    date_time = models.DateTimeField()
+    notes = models.TextField(blank=True)
+    is_confirmed = models.BooleanField(default=False)
+
+    def confirm(self):
+        self.is_confirmed = True
+        self.save()
+
+    def cancel(self):
+        self.is_confirmed = False
+        self.save()
+
+    def is_past(self):
+        return self.date_time < timezone.now()
 
     def __str__(self):
-        return f"История визита: {self.appointment}"
+        return f"{self.patient} -> {self.doctor} on {self.date_time}"

@@ -1,13 +1,10 @@
-from django.urls import path
-from .views import CreateAppointmentAPIView, CancelAppointmentAPIView, DoctorSlotsAPIView
+from rest_framework import routers
+from django.urls import path, include
+from appointments.views import AppointmentViewSet
+
+router = routers.DefaultRouter()
+router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 urlpatterns = [
-    # Создать запись к врачу
-    path('create/', CreateAppointmentAPIView.as_view(), name='create_appointment'),
-
-    # Отменить запись по ID
-    path('cancel/<int:pk>/', CancelAppointmentAPIView.as_view(), name='cancel_appointment'),
-
-    # Получить свободные слоты доктора на конкретную дату (YYYY-MM-DD)
-    path('doctor-slots/<int:doctor_id>/<str:date>/', DoctorSlotsAPIView.as_view(), name='doctor_slots'),
+    path('', include(router.urls)),
 ]

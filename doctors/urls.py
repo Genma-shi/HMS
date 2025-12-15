@@ -1,7 +1,10 @@
-from django.urls import path
-from .views import DoctorListAPIView, DoctorDetailAPIView
+from rest_framework import routers
+from django.urls import path, include
+from doctors.views import DoctorViewSet
+
+router = routers.DefaultRouter()
+router.register(r'doctors', DoctorViewSet, basename='doctors')
 
 urlpatterns = [
-    path('', DoctorListAPIView.as_view()),
-    path('<int:pk>/', DoctorDetailAPIView.as_view()),
+    path('', include(router.urls)),
 ]
