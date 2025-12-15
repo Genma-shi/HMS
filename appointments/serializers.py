@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Appointment, VisitHistory
+from .models import Appointment
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,7 +7,3 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class VisitHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VisitHistory
-        fields = '__all__'
